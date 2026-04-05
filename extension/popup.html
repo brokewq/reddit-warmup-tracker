@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 300px;
+      font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      padding: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .logo {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, #ff6b35, #ff4500);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .header-text h1 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+    .header-text .version {
+      font-size: 9px;
+      color: #555;
+    }
+
+    .account-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #1a1a2e;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .account-label { font-size: 10px; color: #888; }
+    .account-name { font-size: 13px; font-weight: 600; color: #fff; }
+
+    .status-badge {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    .status-badge.tracking {
+      background: rgba(0, 230, 118, 0.12);
+      color: #00e676;
+      border: 1px solid rgba(0, 230, 118, 0.25);
+    }
+    .status-badge.paused {
+      background: rgba(255, 171, 64, 0.12);
+      color: #ffab40;
+      border: 1px solid rgba(255, 171, 64, 0.25);
+    }
+    .status-badge.offline {
+      background: rgba(255, 82, 82, 0.12);
+      color: #ff5252;
+      border: 1px solid rgba(255, 82, 82, 0.25);
+    }
+
+    .timer-section {
+      text-align: center;
+      padding: 16px 0;
+      background: #1a1a2e;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    .timer {
+      font-size: 40px;
+      font-weight: 700;
+      font-family: 'SF Mono', 'Consolas', monospace;
+      letter-spacing: 3px;
+      color: #00e676;
+    }
+    .timer.low { color: #ff5252; }
+    .timer.mid { color: #ffab40; }
+    .timer-label {
+      font-size: 9px;
+      color: #555;
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+    .target-bar {
+      margin: 8px 16px 0;
+      height: 4px;
+      background: #2a2a3e;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .target-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    .target-fill.low { background: #ff5252; }
+    .target-fill.mid { background: #ffab40; }
+    .target-fill.done { background: #00e676; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .stat-card {
+      text-align: center;
+      padding: 10px 0;
+      background: #1a1a2e;
+      border-radius: 8px;
+    }
+    .stat-num {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .stat-label {
+      font-size: 9px;
+      color: #666;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 10px;
+      background: #1a1a2e;
+      border-radius: 6px;
+      font-size: 10px;
+    }
+    .info-label { color: #666; }
+    .info-value { color: #aaa; font-weight: 600; }
+
+    .footer {
+      margin-top: 12px;
+      font-size: 8px;
+      color: #333;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">R</div>
+    <div class="header-text">
+      <h1>WARMUP TRACKER</h1>
+      <span class="version">v1.1.0</span>
+    </div>
+  </div>
+
+  <div class="account-row">
+    <span class="account-label">Account</span>
+    <span class="account-name" id="username">detecting...</span>
+  </div>
+
+  <div class="status-badge paused" id="status-badge">WAITING FOR ENGAGEMENT</div>
+
+  <div class="timer-section">
+    <div class="timer low" id="timer">00:00</div>
+    <div class="timer-label">ACTIVE REDDIT TIME TODAY</div>
+    <div class="target-bar">
+      <div class="target-fill low" id="target-fill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num" id="clicks">0</div>
+      <div class="stat-label">Clicks</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="scrolls">0</div>
+      <div class="stat-label">Scrolls</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="sessions">0</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-item">
+      <span class="info-label">Date</span>
+      <span class="info-value" id="date">--</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Synced</span>
+      <span class="info-value" id="sync">never</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Pending</span>
+      <span class="info-value" id="pending">0</span>
+    </div>
+  </div>
+
+  <div class="footer">DISPLAY ONLY - NO CONTROLS</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
