@@ -10,6 +10,7 @@
       background: #0f0f1a;
       color: #e0e0e0;
       padding: 16px;
+      position: relative;
     }
 
     .header {
@@ -159,6 +160,104 @@
       text-align: center;
       letter-spacing: 0.5px;
     }
+
+    /* Settings */
+    .settings-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: #444;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+    .settings-btn:hover { color: #888; }
+
+    .settings-panel {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      background: #1a1a2e;
+      border-radius: 8px;
+      border: 1px solid #2a2a3e;
+    }
+    .settings-panel.open { display: block; }
+
+    .pw-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .pw-row input {
+      flex: 1;
+      padding: 6px 8px;
+      background: #0f0f1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 11px;
+      outline: none;
+    }
+    .pw-row input:focus { border-color: #555; }
+    .pw-row button {
+      padding: 6px 10px;
+      background: #2a2a3e;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #aaa;
+      font-size: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .pw-row button:hover { background: #333; color: #fff; }
+
+    .pw-error {
+      font-size: 9px;
+      color: #ff5252;
+      margin-bottom: 6px;
+      display: none;
+    }
+
+    .setting-row {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 11px;
+    }
+    .setting-row.visible { display: flex; }
+    .setting-label { color: #aaa; }
+
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .toggle input { display: none; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #333;
+      border-radius: 10px;
+      transition: background 0.2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 2px;
+      top: 2px;
+      background: #888;
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle input:checked + .toggle-slider { background: rgba(0, 230, 118, 0.3); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); background: #00e676; }
   </style>
 </head>
 <body>
@@ -212,6 +311,23 @@
     <div class="info-item">
       <span class="info-label">Pending</span>
       <span class="info-value" id="pending">0</span>
+    </div>
+  </div>
+
+  <button class="settings-btn" id="settings-btn" title="Settings">&#9881;</button>
+
+  <div class="settings-panel" id="settings-panel">
+    <div class="pw-row" id="pw-row">
+      <input type="password" id="pw-input" placeholder="Enter password">
+      <button id="pw-submit">Unlock</button>
+    </div>
+    <div class="pw-error" id="pw-error">Wrong password</div>
+    <div class="setting-row" id="video-setting">
+      <span class="setting-label">Hide Video Posts</span>
+      <label class="toggle">
+        <input type="checkbox" id="video-toggle">
+        <span class="toggle-slider"></span>
+      </label>
     </div>
   </div>
 

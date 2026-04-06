@@ -1,7 +1,11 @@
 // Video Post Hider — Content script for reddit.com
 // Hides all video posts from the feed. Only text and image posts remain visible.
 
-(function () {
+(async function () {
+  // Check if video hiding is enabled (default: on)
+  const { video_hider_enabled } = await chrome.storage.local.get({ video_hider_enabled: true });
+  if (!video_hider_enabled) return;
+
   const isOldReddit = !!document.documentElement.getAttribute('xmlns');
 
   // Domains that host video content

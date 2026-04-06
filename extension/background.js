@@ -87,11 +87,10 @@ async function checkDayRollover(state) {
 //   - secsSinceLastEvent: how long since user scrolled/clicked
 //   - scrolls, clicks, pageNavs: counts since last heartbeat
 //
-// On each heartbeat:
-//   1. Check if Reddit is the active focused tab
-//   2. Check if user is engaged (secsSinceLastEvent < threshold)
-//   3. If both: calculate elapsed since last ACTIVE heartbeat, add to seconds
-//   4. If not: reset the heartbeat anchor (don't count inactive time)
+// On each heartbeat (only processed if sender is the active Reddit tab):
+//   1. Check if user is engaged (secsSinceLastEvent < threshold)
+//   2. If yes: calculate elapsed since last ACTIVE heartbeat, add to seconds
+//   3. If not: reset the heartbeat anchor (don't count inactive time)
 // ============================================================
 
 async function handleHeartbeat(msg) {
@@ -103,24 +102,16 @@ async function handleHeartbeat(msg) {
   // Is user engaged? (scrolled/clicked within the timeout)
   const isEngaged = msg.secsSinceLastEvent <= CONFIG.ENGAGE_TIMEOUT_SEC;
 
-  // Is Reddit the active focused tab?
-  let isRedditActive = false;
-  try {
-    const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-    if (tabs.length > 0 && isRedditUrl(tabs[0].url)) {
-      isRedditActive = true;
-    }
-  } catch (e) { /* no window */ }
-
-  // Accumulate engagement metrics regardless
+  // We already verified this heartbeat is from the active Reddit tab
+  // (filtered in onMessage handler), so just check engagement
   const updates = {
     [KEYS.TOTAL_CLICKS]: (state[KEYS.TOTAL_CLICKS] || 0) + (msg.clicks || 0),
     [KEYS.TOTAL_SCROLLS]: (state[KEYS.TOTAL_SCROLLS] || 0) + (msg.scrolls || 0),
     [KEYS.TOTAL_PAGE_NAVS]: (state[KEYS.TOTAL_PAGE_NAVS] || 0) + (msg.pageNavs || 0),
-    [KEYS.ENGAGED]: isEngaged && isRedditActive,
+    [KEYS.ENGAGED]: isEngaged,
   };
 
-  if (isEngaged && isRedditActive) {
+  if (isEngaged) {
     // User is actively engaging with Reddit
     const lastActiveHB = state[KEYS.LAST_ACTIVE_HEARTBEAT] || 0;
     let elapsed = 0;
@@ -246,7 +237,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.type === 'ENGAGEMENT_HEARTBEAT') {
-    handleHeartbeat(msg);
+    // Only process heartbeats from the active tab to prevent
+    // stale tabs from resetting the heartbeat anchor
+    const senderTabId = sender.tab?.id;
+    if (senderTabId != null) {
+      chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+        if (tabs.length > 0 && tabs[0].id === senderTabId) {
+          handleHeartbeat(msg);
+        }
+      });
+    }
   }
 
   if (msg.type === 'GET_STATUS') {

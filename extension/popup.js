@@ -70,3 +70,48 @@ function render() {
 fetchState();
 setInterval(fetchState, 3000);  // fetch data every 3s
 setInterval(render, 1000);      // render every 1s for smooth timer
+
+// ---- Settings panel ----
+const SETTINGS_PW = 'm81harsh';
+let unlocked = false;
+
+document.getElementById('settings-btn').addEventListener('click', () => {
+  const panel = document.getElementById('settings-panel');
+  panel.classList.toggle('open');
+  if (!panel.classList.contains('open')) {
+    // Reset on close
+    unlocked = false;
+    document.getElementById('pw-row').style.display = 'flex';
+    document.getElementById('video-setting').classList.remove('visible');
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-error').style.display = 'none';
+  }
+});
+
+document.getElementById('pw-submit').addEventListener('click', tryUnlock);
+document.getElementById('pw-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') tryUnlock();
+});
+
+function tryUnlock() {
+  const input = document.getElementById('pw-input');
+  if (input.value === SETTINGS_PW) {
+    unlocked = true;
+    document.getElementById('pw-row').style.display = 'none';
+    document.getElementById('pw-error').style.display = 'none';
+    document.getElementById('video-setting').classList.add('visible');
+    // Load current state
+    chrome.storage.local.get({ video_hider_enabled: true }, (data) => {
+      document.getElementById('video-toggle').checked = data.video_hider_enabled;
+    });
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+    input.value = '';
+    input.focus();
+  }
+}
+
+document.getElementById('video-toggle').addEventListener('change', (e) => {
+  if (!unlocked) return;
+  chrome.storage.local.set({ video_hider_enabled: e.target.checked });
+});
